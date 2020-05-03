@@ -20,7 +20,7 @@ import java.io.PrintWriter;
 class CodeWriter {
 
     private PrintWriter output;
-    private int jumpMade;
+    private int jumpMade = 0;
 
     /**
      * Full constructor. Connects the program with the output file.
@@ -28,7 +28,6 @@ class CodeWriter {
      * @param outputName The output file name.
      */
     CodeWriter ( String outputName ) {
-        jumpMade = 0;
         try {
             output = new PrintWriter ( new FileOutputStream ( outputName ) );
         }
