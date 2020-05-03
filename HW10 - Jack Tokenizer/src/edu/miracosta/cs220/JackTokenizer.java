@@ -28,18 +28,19 @@ import java.util.regex.Pattern;
 class JackTokenizer {
 
     public static void main ( String ... jackFiles ) {
-        String fileName = "/Users/matthewsheehan/Desktop/Re-Work_Projects/SyntaxAnalysis - Jack Compiler/Files/SquareGame.jack";
-        JackTokenizer jt = new JackTokenizer ( fileName );
-        PrintWriter pw;
-        try {
-            pw = new PrintWriter ( new FileOutputStream ( fileName.replaceAll ( "jack", "xml" ) ) );
-            pw.println ( "<tokens>" );
-            jt.getTokens ( pw );
-            pw.println ( "</tokens>" );
-            pw.close ( );
-        } catch ( FileNotFoundException e ) {
-            System.out.println ( "Cannot write to " + fileName.replaceAll ( "jack", "xml" ) );
-        }
+       for ( String fileName : jackFiles ) {
+            JackTokenizer jt = new JackTokenizer ( fileName );
+            PrintWriter pw;
+            try {
+                pw = new PrintWriter ( new FileOutputStream ( fileName.replaceAll ( "jack", "xml" ) ) );
+                pw.println ( "<tokens>" );
+                jt.getTokens ( pw );
+                pw.println ( "</tokens>" );
+                pw.close ( );
+            } catch ( FileNotFoundException e ) {
+                System.out.println ( "Cannot write to " + fileName.replaceAll ( "jack", "xml" ) );
+            }
+       }
     }
 
     // Token categories.
