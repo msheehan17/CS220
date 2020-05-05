@@ -1,4 +1,4 @@
-<h1><b>CS-220</b>:Computer Architecture and Assembly Language</h1>
+<h1><b>CS-220</b>: Computer Architecture and Assembly Language</h1>
 
 <hr>
 
