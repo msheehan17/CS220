@@ -2,6 +2,7 @@ package edu.miracosta.cs220;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -26,72 +27,65 @@ import java.util.regex.Pattern;
  */
 class SymbolTable {
 
-    private Map < String, Integer > symbolTable = new HashMap < > (  );
+    private Map <String, Integer> symbolTable = new HashMap < > ();
 
-    private static String [ ] reservedSymbols = { "SP", "LCL", "ARG", "THIS", "THAT", "SCREEN", "KBD" };
+    private static String [] reservedSymbols = { "SP", "LCL", "ARG", "THIS", "THAT", "SCREEN", "KBD" };
 
-    private static int [ ] reservedSymbolRegisters = { 0, 1, 2, 3, 4, 16384, 24576 };
+    private static int [] reservedSymbolRegisters = { 0, 1, 2, 3, 4, 16384, 24576 };
 
     /**
      * Full constructor, initializes the symbol table hash-map with all pre-defined symbols.
      */
-    SymbolTable ( ) {
-        for ( int i = 0; i < 16; i++ )
-            symbolTable.put ( ( "R" + i ), i );
+    SymbolTable () {
+        for (int i = 0; i < 16; i++)
+            symbolTable.put (("R" + i), i);
 
-        for ( int i = 0; i < reservedSymbols.length; i++ )
-            symbolTable.put ( reservedSymbols [ i ], reservedSymbolRegisters [ i ] );
+        for (int i = 0; i < reservedSymbols.length; i++)
+            symbolTable.put (reservedSymbols [i], reservedSymbolRegisters [i]);
     }
 
     /**
      * Adds a symbol/address pair to the symbol table hash-map (if not already defined, and symbol has valid name).
-     *
-     * @param symbol The symbol to be added.
-     * @param address The register number.
-     *
+     * @param symbolToBeAdded
+     * @param indexToAddTheSymbolAt The register number.
      * @return True if the symbol/address pair was added, false if not.
      */
-    boolean addEntry ( String symbol, int address ) {
-        Integer v; // If symbol added to hash-map, returns null.
-        if ( isValidName ( symbol ) ) {
-            v = symbolTable.putIfAbsent ( symbol, address );
-            return ( v == null );
+    boolean addSymbolToSymbolTable(String symbolToBeAdded, int indexToAddTheSymbolAt) {
+        if (isValidSymbolName(symbolToBeAdded)) {
+            Integer nullIfSymbolNotAdded = symbolTable.putIfAbsent(symbolToBeAdded, indexToAddTheSymbolAt);
+            return (nullIfSymbolNotAdded == null);
         } else
-            return false; // Invalid name.
+            return false;
     }
 
     /**
-     * Determines if the symbol exists in the symbol table hash-map.
-     *
-     * @param symbol The symbol to be checked.
-     *
-     * @return True if the symbol is contained within the hash-map, false if not.
+     * Determines if the symbol argument is located in the symbol table.
+     * @param symbolToBeChecked The symbol to be checked for existence.
+     * @return True if the symbol is in the symbol table, false otherwise.
      */
-    boolean contains ( String symbol ) {
-        return symbolTable.containsKey ( symbol );
+    boolean contains(String symbolToBeChecked) {
+        return symbolTable.containsKey(symbolToBeChecked);
     }
 
     /**
-     * Returns the address linked with the symbol argument.
-     *
-     * @param symbol The symbol who's address is to be returned.
-     *
-     * @return The address of the symbl argument.
+     * Returns the address of valid symbol arguments.
+     * @param symbolToBeCheckedForAddress The symbol to be checked for an address.
+     * @return Returns the symbol argument's address if it is in the symbol table, null otherwise.
      */
-    int getAddress ( String symbol ) {
-        return symbolTable.getOrDefault ( symbol, null );
+    int getAddress(String symbolToBeCheckedForAddress) {
+        return symbolTable.getOrDefault(symbolToBeCheckedForAddress, null);
     }
 
     /**
-     * Determines if the symbol has a valid name. The initial character can be any letter (upper or lowercase), and the
-     * symbols ( . _ $ ). All following characters follow the same rules as the initial character, but can additionally
-     * be any number 0-9.
-     *
-     * @param symbol The symbol to be checked for name validity.
-     *
-     * @return True if the name is valid, false otherwise.
+     * Determines if the symbol argument has a valid name. Valid names will begin with the choice of lower/uppercase
+     * letters, period, underscore, or dollar sign. Subsequent characters follow the same rule with the addition of
+     * numbers.
+     * @param symbolToBeCheckedForValidName The symbol to be checked for name validity.
+     * @return True if the symbol has a valid name, false otherwise.
      */
-    private boolean isValidName ( String symbol ) {
-        return Pattern.compile ( "[a-zA-Z_.$][a-zA-Z0-9_.$]*" ).matcher ( symbol ).matches ( );
+    private static boolean isValidSymbolName(String symbolToBeCheckedForValidName) {
+        Pattern validNamePattern = Pattern.compile ("[a-zA-Z_.$][a-zA-Z0-9_.$]*");
+        Matcher validNameChecker = validNamePattern.matcher (symbolToBeCheckedForValidName);
+        return validNameChecker.matches ();
     }
 }

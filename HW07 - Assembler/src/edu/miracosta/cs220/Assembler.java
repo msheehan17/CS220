@@ -25,16 +25,15 @@ import java.util.Scanner;
  */
 public class Assembler {
 
-    public static void main ( String [ ] args ) {
-        runAssembler ( );
+    public static void main (String [] args) {
+        runAssembler ();
     }
 
     /**
      * Wrapper method for running the assembler, translating the assembly code into binary.
      */
-    private static void runAssembler ( ) {
-        SymbolTable st = new SymbolTable ( ); // Manage symbols.
-        Scanner     sc = new Scanner ( System.in ); // Accept user input.
+    private static void runAssembler () {
+        SymbolTable assemblyCodeSymbolManager = new SymbolTable ();
 
         System.out.print ( "Please enter the file name: " );
 
@@ -62,9 +61,14 @@ public class Assembler {
      *
      * @return The binary representation of the decimal number.
      */
-    private static String decimalToBinary ( int decimal ) {
-        StringBuilder binaryString =  new StringBuilder ( Integer.toBinaryString ( decimal ) );
+    private static String decimalToBinary(int numberToConvertToBinary) {
+        StringBuilder binaryString = new StringBuilder ( Integer.toBinaryString ( decimal ) );
         return "0".repeat ( 16 - binaryString.length ( ) ) + binaryString.toString ( );
+    }
+
+    private static String appendZerosToMakeSixteenDigits(String binaryString) {
+        StringBuilder sixteenBitBinaryString = new StringBuilder (binaryString);
+        for (int index = 0; index < )
     }
 
     /**
@@ -73,7 +77,7 @@ public class Assembler {
      * @param inputFileName The .asm file name.
      * @param symbolTable The table which will store the newly added variables/labels within the .asm file.
      */
-    private static void firstPass ( String inputFileName, SymbolTable symbolTable ) {
+    private static void addSymbolsToTheSymbolTable ( String inputFileName, SymbolTable symbolTable ) {
         Parser parser = new Parser ( inputFileName );
         int rom = 0;
 

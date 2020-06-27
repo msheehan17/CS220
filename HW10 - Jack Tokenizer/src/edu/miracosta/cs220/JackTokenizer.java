@@ -27,8 +27,8 @@ import java.util.regex.Pattern;
  */
 class JackTokenizer {
 
-    public static void main ( String ... jackFiles ) {
-       for ( String fileName : jackFiles ) {
+    public static void main (String ... jackFilesToTranslate) {
+       for ( String fileName : jackFilesToTranslate ) {
             JackTokenizer jt = new JackTokenizer ( fileName );
             PrintWriter pw;
             try {
