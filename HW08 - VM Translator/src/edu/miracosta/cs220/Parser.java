@@ -17,24 +17,24 @@ import java.util.Scanner;
  * - advance: Takes in a line of VM code, cleans it, and determines the VM command type.
  * - Accessor methods for all instance variables (except inputFile).
  *
- * @author Matt Sheehan
+ * Author: Matt Sheehan
  */
 class Parser {
 
-    private Scanner inputFile;   // The file the class will be parsing.
-    private String commandType;  // The command (push, pop, call, return, etc.)
-    private String memorySegment; // The memory segment for non-arithmetic commands (or the arithmetic command alone)
-    private int memoryIndex;     // The index of the memory segment (N/A for arithmetic commands).
+    private Scanner inputFile;
+    private String commandType;
+    private String memorySegment;
+    private int memoryIndex;
 
     /**
      * Full constructor, connects the file with the class.
      */
-    Parser ( String fileName ) {
+    Parser (String inputFileName) {
         try {
-            inputFile = new Scanner ( new FileInputStream ( fileName ) );
-        } catch ( FileNotFoundException e ) {
-            System.out.println ( fileName + " file not found; terminating program." );
-            System.exit ( 0 );
+            inputFile = new Scanner(new FileInputStream(inputFileName));
+        } catch (FileNotFoundException e) {
+            System.out.println (inputFileName + " file not found; terminating program.");
+            System.exit (0);
         }
     }
 
@@ -42,48 +42,54 @@ class Parser {
      * Returns the state of the file having more commands.
      * @return True if the file has more commands for parsing, false if not.
      */
-    boolean hasMoreCommands ( ) {
-        return inputFile.hasNext ( );
+    boolean hasMoreCommands() {
+        return inputFile.hasNext();
     }
 
     /**
      * Captures the next line of VM code, cleans it of comments, the separates the code into a command, and potentially
      * a memory segment and index.
      */
-    void advance ( ) {
-        if ( hasMoreCommands ( ) ) {
-            commandType = memorySegment = null; // Clear out for next command.
+    void advance() {
+        String lineOfVMCode;
+
+        if (hasMoreCommands()) {
+            commandType = null;
+            memorySegment = null;
             memoryIndex = 0;
 
-            String vmLine = inputFile.nextLine ( );
-            vmLine = vmLine.contains ( "//" ) ? vmLine.substring ( 0, vmLine.indexOf ( "//" ) ) : vmLine; // Clean comments.
+            lineOfVMCode = inputFile.nextLine();
+            lineOfVMCode = lineOfVMCode.trim();
+            lineOfVMCode = lineOfVMCode.replaceAll("//.*", "");
 
-            if ( vmLine.isEmpty ( ) ) {
+            if (lineOfVMCode.isEmpty()) {
                 commandType = "Comment";
                 return;
             }
 
-            String [ ] segments  = vmLine.split ( " " ); // Split VM code.
+            String [] segments = lineOfVMCode.split(" ");
 
-            switch ( segments [ 0 ] ) {
+            switch (segments[0]) {
                 case "add", "sub", "neg", "gt", "lt", "eq", "and", "or", "not", "return" ->
-                    commandType = memorySegment = segments[ 0 ];
+                    commandType = memorySegment = segments[0];
                 default -> {
-                    commandType   = segments [ 0 ];
-                    memorySegment = segments [ 1 ];
-                    if ( segments [ 0 ].matches ( "(?i)push|pop|call|function" ) )
-                        memoryIndex = Integer.parseInt ( segments [ 2 ] );
+                    commandType = segments[0];
+                    memorySegment = segments[1];
+                    if (segments[0].matches("(?i)push|pop|call|function")) {
+                        memoryIndex = Integer.parseInt(segments[2]);
+                    }
                 }
             }
-        } else
-            inputFile.close ( );
+        } else {
+            inputFile.close();
+        }
     }
 
     /**
      * Accessor for command type.
      * @return The command type.
      */
-    String getCommandType ( ) {
+    String getCommandType() {
         return commandType;
     }
 
@@ -91,15 +97,15 @@ class Parser {
      * Accessor for memory segment of the command, or arithmetic command.
      * @return The first portion of the command, either memory segment or arithmetic (null if command is return.
      */
-    String getMemorySegment ( ) {
-        return commandType.equals ( "return" )  ? null : memorySegment;
+    String getMemorySegment() {
+        return commandType.equals("return") ? null : memorySegment;
     }
 
     /**
      * Accessor for the index of the memory segment the VM command is working with.
      * @return The index of the memory command, or null if the command type isn't push, pop, call, or function.
      */
-    int getMemoryIndex ( ) {
-        return commandType.matches ( "(?i)push|pop|call|function" )  ? memoryIndex : -1;
+    int getMemoryIndex() {
+        return commandType.matches("(?i)push|pop|call|function") ? memoryIndex : -1;
     }
 }

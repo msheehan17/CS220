@@ -21,109 +21,99 @@ import java.util.Scanner;
  * reference to a label, the ROM line of the label will be translated into binary. C-instructions will be translated
  * based on their contents (dest., comp., jump). Each translated line will be written to .hack file.
  *
- * @author: Matt Sheehan
+ * Author: Matt Sheehan
  */
 public class Assembler {
 
-    public static void main (String [] args) {
-        runAssembler ();
+    public static void main(String [] args) {
+        runAssembler();
     }
 
     /**
      * Wrapper method for running the assembler, translating the assembly code into binary.
      */
-    private static void runAssembler () {
-        SymbolTable assemblyCodeSymbolManager = new SymbolTable ();
+    private static void runAssembler() {
+        String inputFileName;
+        String outputFileName;
+        Scanner userInputFromKeyboard = new Scanner(System.in);
+        SymbolTable assemblyCodeSymbolManager = new SymbolTable();
+        PrintWriter binaryCodeWriter;
 
-        System.out.print ( "Please enter the file name: " );
+        System.out.print("Please enter the file name: ");
+        inputFileName = userInputFromKeyboard.nextLine();
+        outputFileName = inputFileName.replace ("asm", "hack");
 
-        String inputFileName  = sc.nextLine ( );
-
-        String outputFileName =  inputFileName.replace ( "asm", "hack" ); // Make output file (.hack ext.)
-
-        PrintWriter output = null;
         try {
-            output = new PrintWriter ( new FileOutputStream ( outputFileName ) );
-        } catch ( FileNotFoundException e ) {
-            System.err.println ( "Could not write to output file: " + outputFileName );
+            binaryCodeWriter = new PrintWriter(new FileOutputStream(outputFileName));
+            addSymbolsToTheSymbolTable(inputFileName, assemblyCodeSymbolManager);
+            translateAssembly(inputFileName, assemblyCodeSymbolManager, binaryCodeWriter);
+            binaryCodeWriter.close();
+        } catch (FileNotFoundException e) {
+            System.err.println("Could not write to output file: " + outputFileName);
         }
-
-        firstPass  ( inputFileName, st );
-        secondPass ( inputFileName, st, output );
-
-        output.close ( );
     }
 
     /**
      * Coverts a decimal number to binary (String version).
-     *
-     * @param decimal The number to be converted.
-     *
+     * @param numberToConvertToBinary The number to be converted.
      * @return The binary representation of the decimal number.
      */
     private static String decimalToBinary(int numberToConvertToBinary) {
-        StringBuilder binaryString = new StringBuilder ( Integer.toBinaryString ( decimal ) );
-        return "0".repeat ( 16 - binaryString.length ( ) ) + binaryString.toString ( );
-    }
-
-    private static String appendZerosToMakeSixteenDigits(String binaryString) {
-        StringBuilder sixteenBitBinaryString = new StringBuilder (binaryString);
-        for (int index = 0; index < )
+        StringBuilder binaryString = new StringBuilder (Integer.toBinaryString(numberToConvertToBinary));
+        return "0".repeat(16 - binaryString.length()) + binaryString.toString (); // Make 16 digits.
     }
 
     /**
      * Initial pass through the .asm file, determines the need for creating variables/labels within the symbol table.
-     *
      * @param inputFileName The .asm file name.
      * @param symbolTable The table which will store the newly added variables/labels within the .asm file.
      */
-    private static void addSymbolsToTheSymbolTable ( String inputFileName, SymbolTable symbolTable ) {
-        Parser parser = new Parser ( inputFileName );
-        int rom = 0;
+    private static void addSymbolsToTheSymbolTable(String inputFileName, SymbolTable symbolTable) {
+        int romLine = 0;
+        Parser assemblyCodeParser = new Parser(inputFileName);
 
-        while ( parser.hasMoreCommands ( ) ) {
-            parser.advance ( );
-            rom = ( parser.getCommandType ( ) == 'A' || parser.getCommandType ( ) == 'C' ) ? ++rom : rom;
-            if ( parser.getCommandType ( ) == 'L' )
-                symbolTable.addEntry ( parser.getSymbol ( ), rom );
+        while (assemblyCodeParser.hasMoreCommands()) {
+            assemblyCodeParser.advance();
+
+            if (assemblyCodeParser.getCommandType () == 'A' || assemblyCodeParser.getCommandType() == 'C') {
+                ++romLine;
+            } else if ( assemblyCodeParser.getCommandType() == 'L') {
+                symbolTable.addSymbol(assemblyCodeParser.getSymbolInAssemblyCode(), romLine);
+            }
         }
     }
 
     /**
      * Translates the assembly code into its binary representation and prints it to the output file.
-     *
      * @param assemblyFileName The assembly input file.
      * @param symbolTable The symbol table for generating the address of the symbol given.
      * @param output The hack output file.
      */
-    private static void secondPass ( String assemblyFileName, SymbolTable symbolTable, PrintWriter output ) {
-        Parser parser = new Parser ( assemblyFileName );
-        CInstructionMapper cHelp = new CInstructionMapper ( );
-        int ram = 16;
+    private static void translateAssembly(String assemblyFileName, SymbolTable symbolTable, PrintWriter output) {
+        int ramLineNumber = 16;
+        Parser assemblyCodeParser = new Parser(assemblyFileName);
+        CInstructionMapper cInstructionMapper = new CInstructionMapper();
 
-        while ( parser.hasMoreCommands ( ) ) {
-            parser.advance ( );
-            if ( parser.getCommandType ( ) == 'A' ) {
-                StringBuilder a = new StringBuilder ( );
-                // Address
-                if ( Character.isDigit ( parser.getSymbol ( ).charAt ( 0 ) ) ) {
-                    a.append ( decimalToBinary ( Integer.parseInt ( parser.getSymbol ( ) ) ) );
-                    output.println ( a.toString ( ) );
-                // Label/Variable
+        while (assemblyCodeParser.hasMoreCommands()) {
+            assemblyCodeParser.advance();
+            if (assemblyCodeParser.getCommandType() == 'A') {
+                StringBuilder address = new StringBuilder ( );
+                if (Character.isDigit(assemblyCodeParser.getSymbolInAssemblyCode().charAt(0))) {
+                    address.append(decimalToBinary(Integer.parseInt(assemblyCodeParser.getSymbolInAssemblyCode())));
                 } else {
-                    if ( ! symbolTable.contains ( parser.getSymbol ( ) ) ) {
-                        symbolTable.addEntry ( parser.getSymbol ( ), ram );
-                        ++ram;
+                    if (!symbolTable.contains(assemblyCodeParser.getSymbolInAssemblyCode())) {
+                        symbolTable.addSymbol(assemblyCodeParser.getSymbolInAssemblyCode(), ramLineNumber);
+                        ++ramLineNumber;
                     }
-
-                    a.append ( decimalToBinary ( symbolTable.getAddress ( parser.getSymbol ( ) ) ) );
-                    output.println ( a.toString ( ) );
+                    address.append(decimalToBinary(symbolTable.getAddress(assemblyCodeParser.getSymbolInAssemblyCode())));
                 }
-            } else if ( parser.getCommandType ( ) == 'C' ) {
-                String c =  ( "111" + cHelp.comp ( parser.getComp ( ) )
-                                    + cHelp.dest ( parser.getDest ( ) )
-                                    + cHelp.jump ( parser.getJump ( ) ) );
-                output.println ( c );
+                output.println(address.toString());
+            } else if (assemblyCodeParser.getCommandType() == 'C') {
+                String cInstruction = "111";
+                cInstruction += cInstructionMapper.translateComputationMnemonicIntoBinary(assemblyCodeParser.getAssemblyComputationPortion());
+                cInstruction += cInstructionMapper.translateDestinationMnemonicIntoBinary(assemblyCodeParser.getAssemblyDestinationPortion());
+                cInstruction += cInstructionMapper.translateJumpMnemonicIntoBinary(assemblyCodeParser.getAssemblyJumpPortion());
+                output.println (cInstruction);
             }
         }
     }

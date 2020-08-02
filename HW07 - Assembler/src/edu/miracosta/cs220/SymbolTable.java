@@ -23,15 +23,13 @@ import java.util.regex.Pattern;
  * - getAddress: Returns the address corresponding to the symbol argument given.
  * - isValidName: Returns true if the symbol argument has a valid name, false otherwise.
  *
- * @author Matt Sheehan
+ * Author: Matt Sheehan
  */
 class SymbolTable {
 
-    private Map <String, Integer> symbolTable = new HashMap < > ();
-
-    private static String [] reservedSymbols = { "SP", "LCL", "ARG", "THIS", "THAT", "SCREEN", "KBD" };
-
-    private static int [] reservedSymbolRegisters = { 0, 1, 2, 3, 4, 16384, 24576 };
+    private static final Map <String, Integer> symbolTable = new HashMap <> ();
+    private static final String [] reservedSymbols = { "SP", "LCL", "ARG", "THIS", "THAT", "SCREEN", "KBD" };
+    private static final int [] reservedSymbolRegisters = { 0, 1, 2, 3, 4, 16384, 24576 };
 
     /**
      * Full constructor, initializes the symbol table hash-map with all pre-defined symbols.
@@ -46,16 +44,13 @@ class SymbolTable {
 
     /**
      * Adds a symbol/address pair to the symbol table hash-map (if not already defined, and symbol has valid name).
-     * @param symbolToBeAdded
+     * @param symbolToBeAdded The symbol to be added.
      * @param indexToAddTheSymbolAt The register number.
-     * @return True if the symbol/address pair was added, false if not.
      */
-    boolean addSymbolToSymbolTable(String symbolToBeAdded, int indexToAddTheSymbolAt) {
+    void addSymbol(String symbolToBeAdded, int indexToAddTheSymbolAt) {
         if (isValidSymbolName(symbolToBeAdded)) {
-            Integer nullIfSymbolNotAdded = symbolTable.putIfAbsent(symbolToBeAdded, indexToAddTheSymbolAt);
-            return (nullIfSymbolNotAdded == null);
-        } else
-            return false;
+            symbolTable.put(symbolToBeAdded, indexToAddTheSymbolAt);
+        }
     }
 
     /**
@@ -84,8 +79,8 @@ class SymbolTable {
      * @return True if the symbol has a valid name, false otherwise.
      */
     private static boolean isValidSymbolName(String symbolToBeCheckedForValidName) {
-        Pattern validNamePattern = Pattern.compile ("[a-zA-Z_.$][a-zA-Z0-9_.$]*");
-        Matcher validNameChecker = validNamePattern.matcher (symbolToBeCheckedForValidName);
-        return validNameChecker.matches ();
+        Pattern validNamePattern = Pattern.compile("[a-zA-Z_.$][a-zA-Z0-9_.$]*");
+        Matcher validNameChecker = validNamePattern.matcher(symbolToBeCheckedForValidName);
+        return validNameChecker.matches();
     }
 }
