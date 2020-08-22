@@ -73,13 +73,9 @@ class CodeWriter {
 
         if (pushOrPopCommand.equals("push")) {
             pushOrPopASM ="\nA=D+A\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n";
-        } else {
-            pushOrPopASM = "\nD=D+A\n@R13\nM=D\n@SP\nAM=M-1\nD=M\n@R13\nA=M\nM=D\n";
-        }
-
-        if (pushOrPopCommand.equals("push")) {
             staticPointerPushOrPopASM = "\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n";
         } else {
+            pushOrPopASM = "\nD=D+A\n@R13\nM=D\n@SP\nAM=M-1\nD=M\n@R13\nA=M\nM=D\n";
             staticPointerPushOrPopASM = "\nD=A\n@R13\nM=D\n@SP\nAM=M-1\nD=M\n@R13\nA=M\nM=D\n";
         }
 
