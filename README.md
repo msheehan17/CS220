@@ -1,7 +1,5 @@
 <h1><b>CS-220</b>: Computer Architecture and Assembly Language</h1>
 
-<hr>
-
 <p>This course focuses on topics like assembly language, memory addressing, general purpose input/output (GPIO), linking/compiling, interrupts, control structures, micro-controllers, and embedded systems. The course follows the nandtotetris software suite, which aims to "build a computer from the ground up".</p>
 
 <h3><b>Homework Assignments:</b></h3>
